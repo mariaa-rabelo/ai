@@ -1,27 +1,41 @@
 class ZeroPointOneGame:
     def __init__(self):
         # Initialize an 8x8 game board
-        self.board = [['.' for _ in range(8)] for _ in range(8)]
+        self.board = [[' -- ' for _ in range(8)] for _ in range(8)]
         # Set up the initial positions for red (R) and blue (B) pieces
-        self.game_over = False
         self.current_player = 'R'  # Start with Red player
         self.setup_pieces()
+        self.capturedPieces = []
 
     def setup_pieces(self):
-        # Red pieces on the first two rows
-        for i in range(2):
-            for j in range(8):
-                self.board[i][j] = 'R'
-        # Blue pieces on the last two rows
-        for i in range(6, 8):
-            for j in range(8):
-                self.board[i][j] = 'B'
+        # Blue pieces on the first two rows
+        self.board[0] = ['B0-2', 'B0-2', 'B1-1', 'B0-1', 'B1-2', 'B1-1', 'B0-2', 'B0-2']
+        self.board[1] = ['B2-2'] * 8  
+        
+        # Red pieces on the last two rows
+        self.board[6] = ['R2-2'] * 8  
+        self.board[7] = ['R0-2', 'R0-2', 'R1-1', 'R1-2', 'R0-1', 'R1-1', 'R0-2', 'R0-2']
+
+    # Máximo is mean
 
     def print_board(self):
-        # Print the current state of the game board
-        for row in self.board:
-            print(' '.join(row))
+        # Print column headers
+        print('    ' + '    '.join(str(col) for col in range(8)))
+        # Print the current state of the game board with row numbers
+        for row_num, row in enumerate(self.board):
+            print(str(row_num) + ' ' + ' '.join(row))
         print()
+    
+    def get_valid_destinations_for_piece(self, piece_row, piece_col, piece):
+        destinations = []
+        for row in range(8):
+            for col in range(8):
+                if self.is_valid_destination(piece_row, piece_col, row, col, piece):
+                    destinations.append((row, col))
+                    print("origin: ", piece_row, piece_col)
+                    print("piece: ", piece)
+                    print(f"Destination at ({row}, {col}) is valid.")
+        return destinations
 
     def get_player_piece(self):
         # Solicita ao jogador para escolher uma peça para mover
@@ -36,36 +50,86 @@ class ZeroPointOneGame:
             except (ValueError, IndexError):
                 print("Invalid input. Please enter coordinates in the format 'row, col'.")
 
-    def get_destination(self, piece_row, piece_col):
-        # Solicita ao jogador para escolher uma posição de destino válida
+    def get_destination(self, destinations):
         while True:
             try:
+                # Prompt the player for the destination coordinates
                 dest_input = input("Enter the destination coordinates (row, col): ")
                 dest_row, dest_col = map(int, dest_input.split(','))
-                if self.is_valid_destination(piece_row, piece_col, dest_row, dest_col):
+
+                # Check if the destination is in the list of valid destinations
+                if (dest_row, dest_col) in destinations:
                     return (dest_row, dest_col)
                 else:
                     print("Invalid destination. Please choose a valid move.")
+
             except (ValueError, IndexError):
+                # Handle incorrect input formats
                 print("Invalid input. Please enter coordinates in the format 'row, col'.")
 
-    def is_valid_destination(self, piece_row, piece_col, dest_row, dest_col):
-        # TODO: validate for each piece type
-        return 0 <= dest_row < 8 and 0 <= dest_col < 8 and self.board[dest_row][dest_col] == '.'
+    def is_valid_destination(self, start_row, start_col, end_row, end_col, piece):
+        # Verifica se o destino está dentro do tabuleiro
+        if not (0 <= end_row < 8 and 0 <= end_col < 8):
+            print("Destination is out of bounds.")
+            return False
+        
+        # Dicionário com as funções de validação para cada tipo de peça
+        validations = {
+            '2-2': lambda sr, sc, er, ec: abs(er - sr) == 2 and abs(ec - sc) == 2,
+            '0-2': lambda sr, sc, er, ec: (abs(er - sr) == 2 and sc == ec) or (sr == er and abs(ec - sc) == 2),
+            '1-1': lambda sr, sc, er, ec: abs(er - sr) == 1 and abs(ec - sc) == 1,
+            '1-2': lambda sr, sc, er, ec: (abs(er - sr) == 1 and abs(ec - sc) == 2) or (abs(er - sr) == 2 and abs(ec - sc) == 1),
+            '0-1': lambda sr, sc, er, ec: (abs(er - sr) == 1 and sc == ec) or (sr == er and abs(ec - sc) == 1),
+        }
+
+        piece_owner = piece[0]  # 'R' or 'B'
+        piece_type = piece[1:]  # '1-1', '0-2', etc.
+
+        destination_piece = self.board[end_row][end_col]
+
+        # Executa a função de validação correspondente ao tipo da peça
+        if piece_type not in validations:
+            return False
+        
+        if validations[piece_type](start_row, start_col, end_row, end_col):
+            if destination_piece != ' -- ':
+                if destination_piece[0] == piece_owner:
+                    return False
+                else:
+                    # Adiciona a peça capturada à lista de peças capturadas
+                    self.capturedPieces.append(destination_piece)
+                    return True
+            else: # destination_piece == ' -- '
+                return True	
+        return False  # Retorna False se o tipo de peça não for reconhecido
+
 
     def get_player_move(self):
         piece_row, piece_col = self.get_player_piece()
-        dest_row, dest_col = self.get_destination(piece_row, piece_col)
+        piece = self.board[piece_row][piece_col]
+        destinations = self.get_valid_destinations_for_piece(piece_row, piece_col, piece)
+        
+        while not destinations:
+            print("No valid moves for this piece. Please choose another piece.")
+            piece_row, piece_col = self.get_player_piece()
+            piece = self.board[piece_row][piece_col]
+            destinations = self.get_valid_destinations_for_piece(piece_row, piece_col, piece)
+
+        print(f"Possible destinations for {piece} at ({piece_row}, {piece_col}):")
+        for dest in destinations:
+            print(dest)
+        
+        dest_row, dest_col = self.get_destination(destinations)
         return (piece_row, piece_col), (dest_row, dest_col)
 
     def make_move(self, move):
         (start_row, start_col), (end_row, end_col) = move
         self.board[end_row][end_col] = self.board[start_row][start_col]
-        self.board[start_row][start_col] = '.'
+        self.board[start_row][start_col] = ' -- '
 
     #TODO
     def is_terminal(self):
-        # Implement the logic to check if the game is over
+        # returns true if the opponent's 0·1 piece has been captured
         pass
 
     def evaluate(self):
@@ -124,16 +188,19 @@ class ZeroPointOneGame:
                 print("Invalid choice, please try again.")
 
     def game_loop(self):
-        while not self.game_over:
+        while not self.is_terminal():
             self.print_board()
+            # check if player wants to exit game
+            print("Press 'q' to exit the game, and enter to continue: ")
+            choice = input()
+            if choice == 'q':
+                print("Game over! Player {} exited game!".format(self.current_player))
+                return
             move = self.get_player_move()
             self.make_move(move)
             self.current_player = 'B' if self.current_player == 'R' else 'R'  # Switch turns
-            # Check for game over condition
-            self.game_over = self.is_terminal()
-            if self.game_over:
-                print("Game over! Player {} wins!".format(self.current_player))
-                break
+        print("Game over! Player {} wins!".format(self.current_player))
+                
 
 # Create a game instance and print the initial board
 if __name__ == "__main__":
