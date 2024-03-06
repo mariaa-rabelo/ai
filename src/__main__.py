@@ -25,6 +25,7 @@ class ZeroPointOneGame:
         for row_num, row in enumerate(self.board):
             print(str(row_num) + ' ' + ' '.join(row))
         print()
+        print("Captured pieces: ", self.capturedPieces)
     
     def get_valid_destinations_for_piece(self, piece_row, piece_col, piece):
         destinations = []
@@ -32,9 +33,9 @@ class ZeroPointOneGame:
             for col in range(8):
                 if self.is_valid_destination(piece_row, piece_col, row, col, piece):
                     destinations.append((row, col))
-                    print("origin: ", piece_row, piece_col)
-                    print("piece: ", piece)
-                    print(f"Destination at ({row}, {col}) is valid.")
+                    # print("origin: ", piece_row, piece_col)
+                    # print("piece: ", piece)
+                    # print(f"Destination at ({row}, {col}) is valid.")
         return destinations
 
     def get_player_piece(self):
@@ -92,15 +93,10 @@ class ZeroPointOneGame:
             return False
         
         if validations[piece_type](start_row, start_col, end_row, end_col):
-            if destination_piece != ' -- ':
-                if destination_piece[0] == piece_owner:
-                    return False
-                else:
-                    # Adiciona a peça capturada à lista de peças capturadas
-                    self.capturedPieces.append(destination_piece)
-                    return True
-            else: # destination_piece == ' -- '
-                return True	
+            if destination_piece[0] == piece_owner:
+                return False
+            else:
+                return True
         return False  # Retorna False se o tipo de peça não for reconhecido
 
 
@@ -124,13 +120,16 @@ class ZeroPointOneGame:
 
     def make_move(self, move):
         (start_row, start_col), (end_row, end_col) = move
+        if self.board[end_row][end_col] != ' -- ':
+            print("Player {} captured {} piece!".format(self.current_player, self.board[end_row][end_col]))
+            self.capturedPieces.append(self.board[end_row][end_col])
         self.board[end_row][end_col] = self.board[start_row][start_col]
         self.board[start_row][start_col] = ' -- '
 
-    #TODO
     def is_terminal(self):
-        # returns true if the opponent's 0·1 piece has been captured
-        pass
+        if 'R0-1' in self.capturedPieces or 'B0-1' in self.capturedPieces:
+            return True
+        return False
 
     def evaluate(self):
         # Implement the evaluation heuristic for the board state
