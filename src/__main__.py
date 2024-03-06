@@ -99,7 +99,6 @@ class ZeroPointOneGame:
                 return True
         return False  # Retorna False se o tipo de peça não for reconhecido
 
-
     def get_player_move(self):
         piece_row, piece_col = self.get_player_piece()
         piece = self.board[piece_row][piece_col]
@@ -131,17 +130,26 @@ class ZeroPointOneGame:
             return True
         return False
 
+    # TODO : confirm itt
     def evaluate(self):
-        # Implement the evaluation heuristic for the board state
-        pass
+        # Initialize scores for both players
+        score_red, score_blue = 0, 0
 
-    def get_possible_actions(self):
-        # Implement logic to get all possible actions from the current board state
-        pass
+        # Iterate through the board to count pieces
+        for row in self.board:
+            for cell in row:
+                if cell.startswith('R'):  # Piece belongs to the Red player
+                    score_red += 1
+                elif cell.startswith('B'):  # Piece belongs to the Blue player
+                    score_blue += 1
 
-    def result(self, action):
-        # Implement the result of taking an action on the board
-        pass
+        # Return the score for the current player and subtract the opponent's score
+        # This assumes the current player is maximizing their score
+        if self.current_player == 'R':
+            return score_red - score_blue
+        else:
+            return score_blue - score_red
+
 
     def minimax(self, depth, maximizing_player):
         if self.is_terminal() or depth == 0:
