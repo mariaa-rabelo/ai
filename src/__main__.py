@@ -120,7 +120,8 @@ class ZeroPointOneGame:
             move = self.get_player_move()
             self.state.make_move(move)
             self.state.current_player = 'B' if self.state.current_player == 'R' else 'R'  # Switch turns
-        print("Game over! Player {} wins!".format(self.state.current_player))
+        winner = 'R' if self.state.current_player == 'B' else 'B'
+        print("Game over! Player {} wins!".format(winner))
                 
 
 # Create a game instance and print the initial board
