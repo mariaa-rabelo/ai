@@ -12,18 +12,18 @@ class ZeroPointOneGame:
 
     def print_board(self):
         print('    ' + '    '.join(str(col) for col in range(8)))
-        for row_num, row in enumerate(self.board):
+        for row_num, row in enumerate(self.state.board):
             print(str(row_num) + ' ' + ' '.join(row))
         print()
-        print("Captured pieces: ", self.capturedPieces)
+        print("Captured pieces: ", self.state.capturedPieces)
     
     def get_player_piece(self):
         # Solicita ao jogador para escolher uma peça para mover
         while True:
             try:
-                piece_input = input(f"Player {self.current_player}, enter the coordinates of the piece to move (row, col): ")
+                piece_input = input(f"Player {self.state.current_player}, enter the coordinates of the piece to move (row, col): ")
                 row, col = map(int, piece_input.split(','))
-                if self.board[row][col].startswith(self.current_player):
+                if self.state.board[row][col].startswith(self.state.current_player):
                     return (row, col)
                 else:
                     print("That is not your piece. Please choose one of your own pieces.")
@@ -49,14 +49,14 @@ class ZeroPointOneGame:
     
     def get_player_move(self):
         piece_row, piece_col = self.get_player_piece()
-        piece = self.board[piece_row][piece_col]
-        destinations = self.get_valid_destinations_for_piece(piece_row, piece_col, piece)
+        piece = self.state.board[piece_row][piece_col]
+        destinations = self.state.get_valid_destinations_for_piece(piece_row, piece_col, piece)
         
         while not destinations:
             print("No valid moves for this piece. Please choose another piece.")
             piece_row, piece_col = self.get_player_piece()
             piece = self.board[piece_row][piece_col]
-            destinations = self.get_valid_destinations_for_piece(piece_row, piece_col, piece)
+            destinations = self.state.get_valid_destinations_for_piece(piece_row, piece_col, piece)
 
         print(f"Possible destinations for {piece} at ({piece_row}, {piece_col}):")
         for dest in destinations:
@@ -66,17 +66,17 @@ class ZeroPointOneGame:
         return (piece_row, piece_col), (dest_row, dest_col)
     
     def minimax(self, depth, maximizing_player):
-        if self.is_terminal() or depth == 0:
-            return self.evaluate()
+        if self.state.is_terminal() or depth == 0:
+            return self.state.evaluate()
         
         if maximizing_player:
             value = float('-inf')
-            for action in self.get_possible_actions():
+            for action in self.state.get_possible_actions():
                 value = max(value, self.minimax(depth - 1, False))
             return value
         else:
             value = float('inf')
-            for action in self.get_possible_actions():
+            for action in self.state.get_possible_actions():
                 value = min(value, self.minimax(depth - 1, True))
             return value
 
@@ -118,9 +118,9 @@ class ZeroPointOneGame:
                 print("Game over! Player {} exited game!".format(self.current_player))
                 return
             move = self.get_player_move()
-            self.make_move(move)
-            self.current_player = 'B' if self.current_player == 'R' else 'R'  # Switch turns
-        print("Game over! Player {} wins!".format(self.current_player))
+            self.state.make_move(move)
+            self.state.current_player = 'B' if self.state.current_player == 'R' else 'R'  # Switch turns
+        print("Game over! Player {} wins!".format(self.state.current_player))
                 
 
 # Create a game instance and print the initial board
