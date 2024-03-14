@@ -115,12 +115,12 @@ class ZeroPointOneGame:
             print("Press 'q' to exit the game, and enter to continue: ")
             choice = input()
             if choice == 'q':
-                print("Game over! Player {} exited game!".format(self.current_player))
+                print("Game over! Player {} exited game!".format(self.state.current_player))
                 return
             move = self.get_player_move()
             self.state.make_move(move)
             self.state.current_player = 'B' if self.state.current_player == 'R' else 'R'  # Switch turns
-        winner = 'R' if self.state.current_player == 'B' else 'B'
+        winner = 'R' if self.state.current_player == 'B' else 'B' # should it be a class attribute?
         print("Game over! Player {} wins!".format(winner))
                 
 
