@@ -81,10 +81,6 @@ class ZeroPointOneGame:
         return piece, (dest_row, dest_col)
 
     def choose_captured_piece(self):
-        # TODO: check for OPPONENT captured pieces
-        if not self.state.capturedPieces:
-            print("No captured pieces to recover.")
-            return
         while True:
             if self.state.current_player == 'R':
                 print("Choose a black piece to recover:")
@@ -98,7 +94,13 @@ class ZeroPointOneGame:
                         print(f"{i+1}. {piece}")
                         
             choice = input("Enter your choice: ")
-            return self.state.capturedPieces[int(choice) - 1]
+            if choice.isdigit():
+                if 0 < int(choice) <= len(self.state.capturedPieces):
+                    return self.state.capturedPieces[int(choice) - 1]
+                else:
+                    print("Invalid choice, please select one of the possible numbers.")
+            else:
+                print("Invalid input, please enter a number.")
 
     def get_recovery_destination(self):
         while True:
