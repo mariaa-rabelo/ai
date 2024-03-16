@@ -89,4 +89,13 @@ class GameState:
         self.board[end_row][end_col] = self.board[start_row][start_col]
         self.board[start_row][start_col] = ' -- '
 
-
+    #TODO
+    def recover_piece(self, recovery):
+        choosen_piece, (dest_row, dest_col) = recovery
+        for piece in self.capturedPieces:
+            if piece == choosen_piece:
+                self.capturedPieces.remove(piece)
+                break
+        self.board[dest_row][dest_col] = choosen_piece
+        return
+      
