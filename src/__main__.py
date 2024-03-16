@@ -5,7 +5,7 @@ class ZeroPointOneGame:
         self.state = GameState(
             board=[[' -- ' for _ in range(8)] for _ in range(8)],
             current_player='R',
-            capturedPieces=['B2-2']
+            capturedPieces=['B2-2', 'R1-2']
         )
 
     # Máximo is mean
@@ -186,7 +186,6 @@ class ZeroPointOneGame:
     def game_loop(self):
         while not self.state.is_terminal():
             self.print_board()
-            # TODO: check possible actions before displaying the options
             action = self.choose_action()
             # TODO: only one action_apply()
             # a move basically 
@@ -194,7 +193,7 @@ class ZeroPointOneGame:
                 move = self.get_player_move()
                 self.state.make_move(move)
             elif action == '2':  # Recover a captured piece
-                recovery = self.get_recovery() # recover = (piece_type, row, col)
+                recovery = self.get_recovery() # recover = piece_type, (row, col)
                 self.state.recover_piece(recovery)
             elif action == '3':  # Exit game
                 print("Exiting the game.")

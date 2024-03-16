@@ -96,6 +96,8 @@ class GameState:
             if piece == choosen_piece:
                 self.capturedPieces.remove(piece)
                 break
-        self.board[dest_row][dest_col] = choosen_piece
+        # transform the opponent piece into a current player piece
+        new_piece = self.current_player + choosen_piece[1:]
+        self.board[dest_row][dest_col] = new_piece
         return
       
