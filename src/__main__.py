@@ -1,4 +1,5 @@
 from gameState import GameState
+from ai import AI
 
 class ZeroPointOneGame:
     def __init__(self):
@@ -68,16 +69,9 @@ class ZeroPointOneGame:
 
     def get_recovery(self): # recover = (piece_type, row, col)
         piece = self.choose_captured_piece()
-
-        # change it to work both for captured pieces and in-board pieces
-        # destinations = self.state.get_valid_destinations_for_piece(piece)
-
-        # print(f"Possible destinations for {piece} at ({piece_row}, {piece_col}):")
-        # for dest in destinations:
-        #     print(dest)
+        destinations= self.state.get_valid_recovery_positions(piece)
         
-       # dest_row, dest_col = self.get_destination(destinations)
-        dest_row, dest_col = self.get_recovery_destination()
+        dest_row, dest_col = self.get_destination(destinations)
         return piece, (dest_row, dest_col)
 
     def choose_captured_piece(self):
@@ -101,52 +95,6 @@ class ZeroPointOneGame:
                     print("Invalid choice, please select one of the possible numbers.")
             else:
                 print("Invalid input, please enter a number.")
-
-    def get_recovery_destination(self):
-        while True:
-            try:
-                # Prompt the player for the destination coordinates
-                dest_input = input("Enter the destination coordinates (row, col): ")
-                dest_row, dest_col = map(int, dest_input.split(','))
-
-                # Check if the destination is in the list of valid destinations
-                if self.state.board[dest_row][dest_col] == ' -- ':
-                    return (dest_row, dest_col)
-                else:
-                    print("Invalid destination. Please choose an empty cell.")
-
-            except (ValueError, IndexError):
-                # Handle incorrect input formats
-                print("Invalid input. Please enter coordinates in the format 'row, col'.")
-                
-    def minimax(self, depth, maximizing_player):
-        if self.state.is_terminal() or depth == 0:
-            return self.state.evaluate()
-        
-        if maximizing_player:
-            value = float('-inf')
-            for action in self.state.get_possible_actions():
-                value = max(value, self.minimax(depth - 1, False))
-            return value
-        else:
-            value = float('inf')
-            for action in self.state.get_possible_actions():
-                value = min(value, self.minimax(depth - 1, True))
-            return value
-
-    def iterative_deepening_minimax(self, max_depth):
-        best_move = None
-        best_value = float('-inf') if self.current_player == 'R' else float('inf')
-        
-        for depth in range(1, max_depth + 1):
-            value = self.minimax(depth, self.current_player == 'R')
-            if self.current_player == 'R' and value > best_value:
-                best_value = value
-                # Update best_move with the best action found at this depth
-            elif self.current_player == 'B' and value < best_value:
-                best_value = value
-                # Update best_move with the best action found at this depth     
-        return best_move
     
     def choose_action(self):
         options = ['1', '3']
@@ -163,7 +111,7 @@ class ZeroPointOneGame:
                     if any(piece.startswith('R') for piece in self.state.capturedPieces):
                         print("2. Recover a captured piece")
                         options.append('2')
-            print("3. Exit game")
+            print("3. Back to main menu")
             action = input("Enter your choice: ")
             if action in options:
                 return action
@@ -174,32 +122,57 @@ class ZeroPointOneGame:
     def main_menu(self):
         while True:
             print("Welcome to Zero Point One! :)")
-            print("1. Play")
-            print("2. Exit")
+            print("1. Human vs. Human")
+            print("2. Human vs. AI")
+            print("3. AI vs. AI")
+            print("4. Exit")
             choice = input("Enter your choice: ")
             if choice == '1':
+                self.game_mode = 'HvH'
                 self.game_loop()
             elif choice == '2':
+                self.ai_player = AI('B') 
+                self.game_mode = 'HvAI'
+                self.game_loop()
+            elif choice == '3':
+                self.ai_player = AI('B')
+                self.game_mode = 'AIvAI'
+                print("AI functionality is not yet implemented. Please choose another option.")
+            elif choice == '4':
                 print("Exiting the game.")
                 break
             else:
                 print("Invalid choice, please try again.")
 
+    # TODO: only one action_apply()
+    # a move basically 
     def game_loop(self):
         while not self.state.is_terminal():
             self.print_board()
-            action = self.choose_action()
-            # TODO: only one action_apply()
-            # a move basically 
-            if action == '1':  # Move a piece
-                move = self.get_player_move()
-                self.state.make_move(move)
-            elif action == '2':  # Recover a captured piece
-                recovery = self.get_recovery() # recover = piece_type, (row, col)
-                self.state.recover_piece(recovery)
-            elif action == '3':  # Exit game
-                print("Exiting the game.")
-                exit()
+            if self.game_mode == 'HvH':
+                action = self.choose_action()
+                if action == '1':  # Move a piece
+                    move = self.get_player_move()
+                    self.state.make_move(move)
+                elif action == '2':  # Recover a captured piece
+                    recovery = self.get_recovery() # recover = piece_type, (row, col)
+                    self.state.recover_piece(recovery)
+                elif action == '3':  # Back to main menu
+                    return
+            elif self.game_mode == 'HvAI':
+                if self.state.current_player == 'R':
+                    action = self.choose_action()
+                    if action == '1':  # Move a piece
+                        move = self.get_player_move()
+                        self.state.make_move(move)
+                    elif action == '2':  # Recover a captured piece
+                        recovery = self.get_recovery() # recover = piece_type, (row, col)
+                        self.state.recover_piece(recovery)
+                    elif action == '3':  # Back to main menu
+                        return
+                else:
+                    action = self.ai_player.choose_action(self.state)
+                    self.state.apply_action(action)
             self.state.current_player = 'B' if self.state.current_player == 'R' else 'R'  # Switch turns
         winner = 'R' if self.state.current_player == 'B' else 'B' # should it be a class attribute?
         print("Game over! Player {} wins!".format(winner))
