@@ -69,30 +69,19 @@ class GameState:
             return True
         return False
 
-    # TODO : confirm itt
-    def evaluate(self):
-        # Initialize scores for both players
-        score_red, score_blue = 0, 0
-
-        # Iterate through the board to count pieces
+    def evaluate(self): # TODO: smth better than that kkkkkk
+        score = 0
         for row in self.board:
             for cell in row:
-                if cell.startswith('R'):  # Piece belongs to the Red player
-                    score_red += 1
-                elif cell.startswith('B'):  # Piece belongs to the Blue player
-                    score_blue += 1
-
-        # Return the score for the current player and subtract the opponent's score
-        # This assumes the current player is maximizing their score
-        if self.current_player == 'R':
-            return score_red - score_blue
-        else:
-            return score_blue - score_red
+                if cell.startswith(self.current_player):
+                    score += 1  # Favorável ao jogador atual
+                elif cell != ' -- ': 
+                    score -= 1  # Favorável ao oponente
+        return score
 
     def make_move(self, move):
         (start_row, start_col), (end_row, end_col) = move
         if self.board[end_row][end_col] != ' -- ':
-            print("Player {} captured {} piece!".format(self.current_player, self.board[end_row][end_col]))
             self.capturedPieces.append(self.board[end_row][end_col])
         self.board[end_row][end_col] = self.board[start_row][start_col]
         self.board[start_row][start_col] = ' -- '
