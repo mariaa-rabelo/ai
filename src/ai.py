@@ -3,7 +3,7 @@ class AI:
     def __init__(self, player_color):
         self.player_color = player_color
 
-    def minimax(self, game_state, depth, maximizing_player):
+    def minimax(self, game_state, depth, alpha, beta, maximizing_player):
         if game_state.is_terminal() or depth == 0:
             return game_state.evaluate(), None # None?
         
@@ -13,25 +13,31 @@ class AI:
             for action in self.get_possible_actions(game_state, self.player_color):
                 new_game_state = copy.deepcopy(game_state)
                 new_game_state.apply_action(action)
-                score, _ = self.minimax(new_game_state, depth - 1, False)
+                score, _ = self.minimax(new_game_state, depth - 1, alpha, beta, False)
                 if score > bestScore:
                     bestScore = score
                     best_action = action
+                alpha = max(alpha, score)
+                if beta <= alpha:
+                    break
         else:
             bestScore = float('inf') # if not maximizing_player, the best score is the lowest possible
             for action in self.get_possible_actions(game_state, self.player_color):
                 new_game_state = copy.deepcopy(game_state)
                 new_game_state.apply_action(action)
-                score, _ = self.minimax(new_game_state, depth - 1, True)
+                score, _ = self.minimax(new_game_state, depth - 1, alpha, beta, True)
                 if score < bestScore:
                     bestScore = score
                     best_action = action
+                beta = min(beta, score)
+                if beta <= alpha:
+                    break
         return bestScore, best_action
 
     def iterative_deepening_minimax(self, game_state, max_depth): # deveria ser apenas uma função?
         best_score = float('-inf') 
         for depth in range(1, max_depth + 1):
-            score, action = self.minimax(game_state, depth, True)
+            score, action = self.minimax(game_state, depth, float('-inf'), float('inf'), True)
             print(f"Depth: {depth}, Score: {score}, Action: {action}")
             if score > best_score:
                 best_score = score
