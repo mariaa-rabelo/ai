@@ -161,7 +161,7 @@ class ZeroPointOneGame:
                     elif action == '3':  # Back to main menu
                         return
                 else:
-                    action = self.ai_player.iterative_deepening_minimax(self.state, 4) 
+                    action = self.ai_player.iterative_deepening_minimax(self.state, 3) 
                     self.state.apply_action(action)
                     print("AI action changed the score to: ", -self.state.evaluate())
             elif self.game_mode == 'AIvAI':
@@ -170,7 +170,7 @@ class ZeroPointOneGame:
                     self.state.apply_action(action)
                     print("AI_B action changed the score to: ", -self.state.evaluate())
                 else:
-                    action = self.ai_player_2nd.iterative_deepening_minimax(self.state, 3)
+                    action = self.ai_player_2nd.iterative_deepening_minimax(self.state, 1)
                     self.state.apply_action(action)
                     print("AI_R action changed the score to: ", -self.state.evaluate())
 
