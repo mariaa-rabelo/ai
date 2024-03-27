@@ -140,11 +140,11 @@ class ZeroPointOneGame:
                 if action == '1':  # Move a piece
                     move = self.get_player_move()
                     self.state.make_move(move)
-                    print("This action changed the score to: ", self.state.evaluate())
+                    print("This action changed the score to: ", -self.state.evaluate())
                 elif action == '2':  # Recover a captured piece
                     recovery = self.get_recovery() # recover = piece_type, (row, col)
                     self.state.recover_piece(recovery)
-                    print("This action changed the score to: ", self.state.evaluate())
+                    print("This action changed the score to: ", -self.state.evaluate())
                 elif action == '3':  # Back to main menu
                     return
             elif self.game_mode == 'HvAI':
@@ -153,28 +153,27 @@ class ZeroPointOneGame:
                     if action == '1':  # Move a piece
                         move = self.get_player_move()
                         self.state.make_move(move)
-                        print("This action changed the score to: ", self.state.evaluate())
+                        print("This action changed the score to: ", -self.state.evaluate())
                     elif action == '2':  # Recover a captured piece
                         recovery = self.get_recovery() # recover = piece_type, (row, col)
                         self.state.recover_piece(recovery)
-                        print("This action changed the score to: ", self.state.evaluate())
+                        print("This action changed the score to: ", -self.state.evaluate())
                     elif action == '3':  # Back to main menu
                         return
                 else:
-                    action = self.ai_player.iterative_deepening_minimax(self.state, 2) # why does it take so long with depth=3??
+                    action = self.ai_player.iterative_deepening_minimax(self.state, 3) 
                     self.state.apply_action(action)
-                    print("AI action changed the score to: ", self.state.evaluate())
+                    print("AI action changed the score to: ", -self.state.evaluate())
             elif self.game_mode == 'AIvAI':
                 if self.state.current_player == 'B':
                     action = self.ai_player.iterative_deepening_minimax(self.state, 3)
                     self.state.apply_action(action)
-                    print("AI_B action changed the score to: ", self.state.evaluate())
+                    print("AI_B action changed the score to: ", -self.state.evaluate())
                 else:
                     action = self.ai_player_2nd.iterative_deepening_minimax(self.state, 3)
                     self.state.apply_action(action)
-                    print("AI_R action changed the score to: ", self.state.evaluate())
+                    print("AI_R action changed the score to: ", -self.state.evaluate())
 
-            self.state.current_player = 'B' if self.state.current_player == 'R' else 'R'  # Switch turns
             self.turns_count += 1
         winner = 'R' if self.state.current_player == 'B' else 'B' 
         print("Game over! Player {} wins!".format(winner))

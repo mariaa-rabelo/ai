@@ -4,44 +4,63 @@ class AI:
         self.player_color = player_color
 
     def minimax(self, game_state, depth, alpha, beta, maximizing_player):
-        if game_state.is_terminal() or depth == 0:
-            return game_state.evaluate(), None # None?
         
-        best_action = None
-        if maximizing_player:
-            bestScore = float('-inf')
-            for action in self.get_possible_actions(game_state, self.player_color):
+        if game_state.is_terminal() or depth == 0:
+            # print(f"at depth {depth}. Score: {game_state.evaluate()}")
+            # if (maximizing_player):
+            #     return game_state.evaluate(), None
+            return -game_state.evaluate(), None # invert score 
+        
+        if (maximizing_player):
+            max_score = float('-inf')
+            best_action = None
+            for action in self.get_possible_actions(game_state, game_state.current_player):
                 new_game_state = copy.deepcopy(game_state)
                 new_game_state.apply_action(action)
                 score, _ = self.minimax(new_game_state, depth - 1, alpha, beta, False)
-                if score > bestScore:
-                    bestScore = score
+                if score > max_score:
+                    max_score = score
                     best_action = action
                 alpha = max(alpha, score)
                 if beta <= alpha:
                     break
+            # print(f"Max score: {max_score}, Best action: {best_action} for player {game_state.current_player} with depth {depth}")
+            return max_score, best_action
         else:
-            bestScore = float('inf') # if not maximizing_player, the best score is the lowest possible
-            for action in self.get_possible_actions(game_state, self.player_color):
+            min_score = float('inf')
+            best_action = None
+            for action in self.get_possible_actions(game_state, game_state.current_player):
                 new_game_state = copy.deepcopy(game_state)
                 new_game_state.apply_action(action)
                 score, _ = self.minimax(new_game_state, depth - 1, alpha, beta, True)
-                if score < bestScore:
-                    bestScore = score
+                if score < min_score:
+                    min_score = score
                     best_action = action
                 beta = min(beta, score)
                 if beta <= alpha:
                     break
-        return bestScore, best_action
+            # print()
+            # print(f"Min score: {min_score}, Best action: {best_action} for player {game_state.current_player} with depth {depth}")
+            return min_score, best_action
+       
 
-    def iterative_deepening_minimax(self, game_state, max_depth): # deveria ser apenas uma função?
+    def iterative_deepening_minimax(self, game_state, max_depth):
+        print(f"Player {game_state.current_player} is thinking...")
+        print(f"Current score: {game_state.evaluate()}")
+        print()
         best_score = float('-inf') 
         for depth in range(1, max_depth + 1):
+            print(f"Thinking at depth {depth}...")
+            print()
+
             score, action = self.minimax(game_state, depth, float('-inf'), float('inf'), True)
             print(f"Depth: {depth}, Score: {score}, Action: {action}")
             if score > best_score:
                 best_score = score
                 best_action = action
+                print(f"Until depth {depth}, best score {best_score} for best action: {best_action}")
+            print()
+            
         return best_action
     
 

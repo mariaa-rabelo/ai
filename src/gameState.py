@@ -56,12 +56,12 @@ class GameState:
                     # print(f"Destination at ({row}, {col}) is valid.")
         return destinations
     
-    def get_valid_recovery_positions(self, piece):
+    def get_valid_recovery_positions(self, piece): # remove piece arg
         recovery_positions = []
         for row in range(8):
             for col in range(8):
                 if self.board[row][col] == ' -- ':
-                    recovery_positions.append((row, col))
+                    recovery_positions.append((row, col)) # TODO: check it... is it allowing occupied positions?
         return recovery_positions
 
     def is_terminal(self):
@@ -85,6 +85,7 @@ class GameState:
             self.capturedPieces.append(self.board[end_row][end_col])
         self.board[end_row][end_col] = self.board[start_row][start_col]
         self.board[start_row][start_col] = ' -- '
+        self.switch_current_player()
 
     def recover_piece(self, recovery):
         choosen_piece, (dest_row, dest_col) = recovery
@@ -95,11 +96,14 @@ class GameState:
         # transform the opponent piece into a current player piece
         new_piece = self.current_player + choosen_piece[1:]
         self.board[dest_row][dest_col] = new_piece
-        return
-    
+        self.switch_current_player()
+
     def apply_action(self, action):
         if action[0] == 'move':
             self.make_move(action[1:])
         elif action[0] == 'recover':
             self.recover_piece(action[1:])
+    
+    def switch_current_player(self):
+        self.current_player = 'B' if self.current_player == 'R' else 'R'
 
