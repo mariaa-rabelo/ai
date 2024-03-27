@@ -14,7 +14,7 @@ class ZeroPointOneGame:
         self.state = GameState(
             board=[[' -- ' for _ in range(8)] for _ in range(8)],
             current_player='R',
-            capturedPieces=['B2-2', 'R1-2', 'B1-1']
+            capturedPieces= ['B2-2', 'R1-2', 'B1-1']
         )
 
 
@@ -161,7 +161,7 @@ class ZeroPointOneGame:
                     elif action == '3':  # Back to main menu
                         return
                 else:
-                    action = self.ai_player.iterative_deepening_minimax(self.state, 3) 
+                    action = self.ai_player.iterative_deepening_minimax(self.state, 4) 
                     self.state.apply_action(action)
                     print("AI action changed the score to: ", -self.state.evaluate())
             elif self.game_mode == 'AIvAI':
