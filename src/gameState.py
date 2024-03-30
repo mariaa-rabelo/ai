@@ -8,10 +8,10 @@ class GameState:
     def setup_pieces(self):
         # Blue pieces on the first two rows
         self.board[0] = ['B0-2', 'B0-2', 'B1-1', 'B0-1', 'B1-2', 'B1-1', 'B0-2', 'B0-2']
-        self.board[1] = ['B2-2'] * 8  
+        self.board[1] = ['B2-2'] * 8
         
         # Red pieces on the last two rows
-        self.board[6] = ['R2-2'] * 8  
+        self.board[6] = ['R2-2'] * 8
         self.board[7] = ['R0-2', 'R0-2', 'R1-1', 'R1-2', 'R0-1', 'R1-1', 'R0-2', 'R0-2']
 
     def is_valid_destination(self, start_row, start_col, end_row, end_col, piece):
@@ -75,7 +75,7 @@ class GameState:
             for cell in row:
                 if cell.startswith(self.current_player):
                     score += 1  # Favorável ao jogador atual
-                elif cell != ' -- ': 
+                elif cell != ' -- ':
                     score -= 1  # Favorável ao oponente
         return score
 
