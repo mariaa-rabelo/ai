@@ -2,8 +2,10 @@ from gameState import GameState
 from ai import AI
 
 class ZeroPointOneGame:
-    def __init__(self, game_mode):
+    def __init__(self, game_mode, depth1 = 0, depth2 = 0):
         self.game_mode = game_mode
+        self.depth1 = depth1
+        self.depth2 = depth2
         self.turns_count = 0
         if game_mode == 'HvAI':
             self.ai_player = AI('B')
@@ -17,8 +19,6 @@ class ZeroPointOneGame:
             capturedPieces= ['B2-2', 'R1-2', 'B1-1']
         )
 
-
-    # Máximo is mean
 
     def print_board(self):
         print('    ' + '    '.join(str(col) for col in range(8)))
@@ -161,16 +161,16 @@ class ZeroPointOneGame:
                     elif action == '3':  # Back to main menu
                         return
                 else:
-                    action = self.ai_player.iterative_deepening_minimax(self.state, 3) 
+                    action = self.ai_player.iterative_deepening_minimax(self.state, self.depth2) 
                     self.state.apply_action(action)
                     print("AI action changed the score to: ", -self.state.evaluate())
             elif self.game_mode == 'AIvAI':
                 if self.state.current_player == 'B':
-                    action = self.ai_player.iterative_deepening_minimax(self.state, 3)
+                    action = self.ai_player.iterative_deepening_minimax(self.state, self.depth2)
                     self.state.apply_action(action)
                     print("AI_B action changed the score to: ", -self.state.evaluate())
                 else:
-                    action = self.ai_player_2nd.iterative_deepening_minimax(self.state, 1)
+                    action = self.ai_player_2nd.iterative_deepening_minimax(self.state, self.depth1)
                     self.state.apply_action(action)
                     print("AI_R action changed the score to: ", -self.state.evaluate())
 
