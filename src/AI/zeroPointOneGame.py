@@ -17,11 +17,13 @@ class ZeroPointOneGame:
     """
 
     def __init__(self, game_mode, depth1 = 0, depth2 = 0):
-         """
+        """
         Initialize the game with the specified mode and setup the initial game state.
 
         Args:
             game_mode (str): The mode of the game ('HvH', 'HvAI', or 'AIvAI').
+            depth1 (int): Max depth to use in iterative deepening minimax for Red, if applicable
+            depth2 (int): Max depth to use in iterative deepening minimax for Blue, if applicable
         """
         self.game_mode = game_mode
         self.depth1 = depth1

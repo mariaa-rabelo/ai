@@ -60,6 +60,7 @@ def main_menu():
                         game.game_loop()
                     elif c2 == '2':
                         game = ZeroPointOneGame('AIvAI', 2, 3)
+                        game.game_loop()
                     elif c2 == '3':
                         print()
                         print()
@@ -78,6 +79,7 @@ def main_menu():
                         game.game_loop()
                     elif c2 == '2':
                         game = ZeroPointOneGame('AIvAI', 3, 3)
+                        game.game_loop()
                     elif c2 == '3':
                         print()
                         print()

@@ -156,7 +156,7 @@ class GameState:
                 if cell.startswith(self.current_player):
                     score += 1  # Favourable to the current player
                 elif cell != ' -- ':
-                    score -= 1  # Favorable to the opponent
+                    score -= 1  # Favourable to the opponent
         return score
 
     def make_move(self, move):
