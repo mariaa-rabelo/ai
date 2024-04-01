@@ -16,14 +16,16 @@ class ZeroPointOneGame:
         state (GameState): The current state of the game, holding the board, players, and captured pieces.
     """
 
-    def __init__(self, game_mode):
-        """
+    def __init__(self, game_mode, depth1 = 0, depth2 = 0):
+         """
         Initialize the game with the specified mode and setup the initial game state.
 
         Args:
             game_mode (str): The mode of the game ('HvH', 'HvAI', or 'AIvAI').
         """
         self.game_mode = game_mode
+        self.depth1 = depth1
+        self.depth2 = depth2
         self.turns_count = 0
 
         # Initialize AI players depending on the game mode
@@ -39,8 +41,6 @@ class ZeroPointOneGame:
             current_player='R',
             capturedPieces= []
         )
-
-
 
     def print_board(self):
         """
@@ -270,16 +270,16 @@ class ZeroPointOneGame:
                     elif action == '3':  # Back to main menu
                         return
                 else:
-                    action = self.ai_player.iterative_deepening_minimax(self.state, 3) 
+                    action = self.ai_player.iterative_deepening_minimax(self.state, self.depth2) 
                     self.state.apply_action(action)
                     print("AI action changed the score to: ", -self.state.evaluate())
             elif self.game_mode == 'AIvAI':
                 if self.state.current_player == 'B':
-                    action = self.ai_player.iterative_deepening_minimax(self.state, 3)
+                    action = self.ai_player.iterative_deepening_minimax(self.state, self.depth2)
                     self.state.apply_action(action)
                     print("AI_B action changed the score to: ", -self.state.evaluate())
                 else:
-                    action = self.ai_player_2nd.iterative_deepening_minimax(self.state, 1)
+                    action = self.ai_player_2nd.iterative_deepening_minimax(self.state, self.depth1)
                     self.state.apply_action(action)
                     print("AI_R action changed the score to: ", -self.state.evaluate())
 
