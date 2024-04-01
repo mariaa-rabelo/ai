@@ -1,15 +1,16 @@
 import pygame
-from .constants import BLACK, ROWS, RED, SQUARE_SIZE, COLS, WHITE, BLUE
-from .piece import Piece
+from constants import BLACK, ROWS, RED, SQUARE_SIZE, COLS, WHITE, BLUE
+from piece import Piece
 
-class Board:
+class State:
   def __init__(self):
     self.board = []
     self.create_board()
     self.captured_pieces_blue = []
-    self.captured_pieces_blue_curr = (0, 0)
+    self.captured_pieces_blue_curr = [0, 0]
     self.captured_pieces_red = []
-    self.captured_pieces_blue_curr = (0, 0)
+    self.captured_pieces_red_curr = [0, 0]
+    self.create_captured_pieces_board()
 
   def draw_squares(self, win):
     win.fill(WHITE)
@@ -26,14 +27,27 @@ class Board:
         pygame.draw.rect(win, WHITE, (row*SQUARE_SIZE + 1, col*SQUARE_SIZE + 1, SQUARE_SIZE - 2, SQUARE_SIZE - 2)) #coords position where to write and dimensions of drawing
     
   def move(self, piece, row, col):
-    self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]
+    self.remove(piece)
     piece.move(row, col)
+    self.board[row][col] = piece
 
   def remove(self, piece):
-    self.board[piece.row][piece.col] = 0
+    if piece.col < 8:
+      self.board[piece.row][piece.col] = 0
+    else:
+      if piece.row < 4:
+        self.captured_pieces_blue[piece.row][piece.col - 8] = 0
+      else:
+        self.captured_pieces_red[piece.row - 4][piece.col - 8] = 0
 
   def get_piece(self, row, col):
     return self.board[row][col]
+  
+  def get_piece_cpb(self, row, col):
+    if row < 4:
+      return self.captured_pieces_blue[row][col]
+    else:
+      return self.captured_pieces_red[row - 4][col]
 
   def create_board(self):
     for row in range(ROWS):
@@ -64,10 +78,34 @@ class Board:
         else:
           self.board[row].append(0)
 
-  # def add_captured_piece(self, piece):
-  #   if piece.color == BLUE:
-  #      if self.captured_pieces_red_curr == (_, 3):
-  #         self.captured_pieces_red.append([piece])
+  def create_captured_pieces_board(self):
+    for row in range(4):
+      self.captured_pieces_blue.append([])
+      self.captured_pieces_red.append([])
+      for _ in range(4):
+         self.captured_pieces_blue[row].append(0)
+         self.captured_pieces_red[row].append(0)
+
+  def add_captured_piece(self, piece):
+    if piece.color == BLUE:
+      piece.color = RED
+      if self.captured_pieces_red_curr[1] == 3:
+        self.captured_pieces_red_curr[0] += 1
+        self.captured_pieces_red_curr[1] = 0
+
+      self.captured_pieces_red[self.captured_pieces_red_curr[0]][self.captured_pieces_red_curr[1]] = piece
+      piece.move(self.captured_pieces_red_curr[0] + 4, self.captured_pieces_red_curr[1] + 8)
+      self.captured_pieces_red_curr[1] += 1
+
+    else:
+      piece.color = BLUE
+      if self.captured_pieces_blue_curr[1] == 3:
+        self.captured_pieces_blue_curr[0] += 1
+        self.captured_pieces_blue_curr[1] = 0    
+
+      self.captured_pieces_blue[self.captured_pieces_blue_curr[0]][self.captured_pieces_blue_curr[1]] = piece
+      piece.move(self.captured_pieces_blue_curr[0], self.captured_pieces_blue_curr[1] + 8)
+      self.captured_pieces_blue_curr[1] += 1
 
   def draw(self, win):
     self.draw_squares(win)
@@ -76,6 +114,29 @@ class Board:
         piece = self.board[row][col]
         if piece != 0:
           piece.draw(win)
+
+    for row in range(ROWS // 2):
+      for col in range(COLS, COLS + 4):
+        piece = self.captured_pieces_blue[row][col - 8]
+        if piece != 0:
+          piece.draw(win)
+
+    for row in range(ROWS // 2, ROWS):
+      for col in range(COLS, COLS + 4):
+        piece = self.captured_pieces_red[row - ROWS // 2][col - 8]
+        if piece != 0:
+          piece.draw(win)
+
+  def winner(self):
+    for row in self.captured_pieces_blue:
+      for piece in row:
+        if piece != 0 and piece.type == 0.1:
+          return True
+    for row in self.captured_pieces_red:
+      for piece in row:
+        if piece != 0 and piece.type == 0.1:
+          return True
+    return False
 
   def is_valid_destination(self, start_row, start_col, end_row, end_col, piece):
         # Verifica se o destino está dentro do tabuleiro
@@ -116,106 +177,10 @@ class Board:
                     # print(f"Destination at ({row}, {col}) is valid.")
         return destinations
   
-  def get_valid_recovery_positions(self, piece): # remove piece arg
+  def get_valid_recovery_positions(self):
         recovery_positions = []
         for row in range(ROWS):
             for col in range(COLS):
                 if self.board[row][col] == 0:
-                    recovery_positions.append((row, col)) # TODO: check it... is it allowing occupied positions?
+                    recovery_positions.append((row, col))
         return recovery_positions
-  
-  def evaluate(self): # TODO: smth better than that kkkkkk
-        score = 0
-        for row in self.board:
-            for cell in row:
-                if cell.startswith(self.current_player):
-                    score += 1  # Favorável ao jogador atual
-                elif cell != ' -- ':
-                    score -= 1  # Favorável ao oponente
-        return score
-
-  def get_valid_moves(self, piece):
-    moves = {}
-    left = piece.col - 1
-    right = piece.col + 1
-    row = piece.row
-
-    if piece.color == RED:
-      moves.update(self._traverse_left(row - 1, max(row -3, -1), -1, piece.color, left))
-      moves.update(self._traverse_right(row - 1, max(row -3, -1), -1, piece.color, right))
-
-    if piece.color == WHITE:
-      moves.update(self._traverse_left(row + 1, min(row +3, -1), 1, piece.color, left))
-      moves.update(self._traverse_right(row + 1, min(row +3, -1), 1, piece.color, right))
-
-    return moves
-
-  def _traverse_left(self, start, stop, step, color, left, skipped = []):
-    moves = {}
-    last = []
-    for r in range(start, stop, step):
-      if left < 0:
-        break
-
-      current = self.board[r][left]
-      if current == 0:
-        if skipped and not last:
-          break
-        elif skipped:
-          moves[(r, left)] = last + skipped
-        else:
-          moves[(r, left)] = last
-
-        if last:
-          if step == -1:
-            row = max(r-3, -1)
-          else:
-            row = min(r+3, ROWS)
-
-          moves.update(self._traverse_left(r + step, row, step, color, left - 1, skipped = last))
-          moves.update(self._traverse_right(r + step, row, step, color, left + 1, skipped = last))
-        break
-
-      elif current.color == color:
-        break
-      else:
-        last = [current]
-
-      left -= 1
-
-    return moves
-
-  def _traverse_right(self, start, stop, step, color, right, skipped = []):
-    moves = {}
-    last = []
-    for r in range(start, stop, step):
-      if right >= COLS:
-        break
-
-      current = self.board[r][right]
-      if current == 0:
-        if skipped and not last:
-          break
-        elif skipped:
-          moves[(r, right)] = last + skipped
-        else:
-          moves[(r, right)] = last
-
-        if last:
-          if step == -1:
-            row = max(r-3, -1)
-          else:
-            row = min(r+3, ROWS)
-
-          moves.update(self._traverse_left(r + step, row, step, color, right - 1, skipped = last))
-          moves.update(self._traverse_right(r + step, row, step, color, right + 1, skipped = last))
-          break
-
-      elif current.color == color:
-        break
-      else:
-        last = [current]
-
-      right += 1
-
-    return moves

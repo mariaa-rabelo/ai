@@ -1,5 +1,4 @@
 from zeroPointOneGame import ZeroPointOneGame
-from ai import AI
 
 def main_menu():
         while True:

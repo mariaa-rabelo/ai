@@ -1,5 +1,5 @@
 import pygame
-from .constants import *
+from constants import *
 
 class Piece:
   PADDING = 15
@@ -35,11 +35,6 @@ class Piece:
       win.blit(TWOONE, (self.x - TWOONE.get_width() // 2, self.y - TWOONE.get_height() // 2))
     elif self.type == 2.2:
       win.blit(TWOTWO, (self.x - TWOTWO.get_width() // 2, self.y - TWOTWO.get_height() // 2))
-
-    """ font = pygame.font.Font('', 32)
-    text = font.render(self.type, True, BLACK)
-    textRect = text.get_rect()
-    textRect.center = (self.x, self.y) """
   
   def move(self, row, col):
     self.row = row

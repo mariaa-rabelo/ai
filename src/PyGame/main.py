@@ -1,7 +1,6 @@
 import pygame
-from checkers.constants import WIDTH, HEIGHT, SQUARE_SIZE
-from checkers.board import Board
-from checkers.game import Game
+from constants import WIDTH, HEIGHT, SQUARE_SIZE, BLUE
+from game import Game
 
 FPS = 60
 
@@ -29,10 +28,17 @@ def main():
       if event.type == pygame.MOUSEBUTTONDOWN:
         pos = pygame.mouse.get_pos()
         row, col = get_row_col_from_mouse(pos)
-        if row < 8 and col < 8:
+        if col < 8:
           game.select(row, col)
+        else:
+          game.select_cpb(row, col - 8)
     
     game.update()
+    if game.winner():
+      run = False        
+      winner = 'Red' if game.turn == BLUE else 'Blue' 
+      print("Game over! Player {} wins!".format(winner))
+      print("Total turns: ", game.turns_count)
 
   pygame.quit()
 
